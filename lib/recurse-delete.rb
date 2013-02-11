@@ -32,21 +32,27 @@ module RecurseDelete
 
   def delete_recursively(parent_class, parent_ids)
     # delete all the parent records
-    parent_class.delete_all(:id => parent_ids)
+
+    # rails3_acts_as_paranoid support
+    if parent_class.respond_to?(:with_deleted, :delete_all!)
+      parent_class.delete_all!(:id => parent_ids)
+    else
+      parent_class.delete_all(:id => parent_ids)
+    end
 
     # get the assocs for the parent class
     assocs = parent_class.reflect_on_all_associations.select do |assoc|
       [:destroy, :destroy_all, :delete, :delete_all].include? assoc.options[:dependent]
     end
     assocs.each do |assoc|
-      # get the dependent class
-      dependent_class = assoc.klass
+      # get the base_scope - rails3_acts_as_paranoid support
+      base_scope = assoc.klass.respond_to?(:with_deleted) ? assoc.klass.with_deleted : assoc.klass
       # get the foreign key
       foreign_key = assoc.foreign_key
       # get all the dependent record ids
-      dependent_ids = dependent_class.where(foreign_key => parent_ids).value_of(:id)
+      dependent_ids = base_scope.where(foreign_key => parent_ids).value_of(:id)
       # recurse
-      delete_recursively(dependent_class, dependent_ids)
+      delete_recursively(base_scope, dependent_ids)
     end
   end
 
