@@ -11,5 +11,5 @@ Gem::Specification.new do |s|
 
   s.add_dependency('activerecord', '>= 3.2.3')
   s.add_dependency('activesupport', '>= 3.2.3')
-  s.add_dependency('valium', '0.5.0')
+  s.add_dependency('valium', '>=0.5.0')
 end

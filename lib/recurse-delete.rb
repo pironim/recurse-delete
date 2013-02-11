@@ -40,10 +40,10 @@ module RecurseDelete
     end
     assocs.each do |assoc|
       # get the dependent class
-      dependent_class = assoc.name.to_s.classify.constantize
+      dependent_class = assoc.klass
       # get the foreign key
-      foreign_key = (assoc.options[:foreign_key] or parent_class.to_s.foreign_key)
-      # get all the dependent record ids 
+      foreign_key = assoc.foreign_key
+      # get all the dependent record ids
       dependent_ids = dependent_class.where(foreign_key => parent_ids).value_of(:id)
       # recurse
       delete_recursively(dependent_class, dependent_ids)
